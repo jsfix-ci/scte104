@@ -40,6 +40,6 @@
   },
   "dependencies": {
     "@astronautlabs/bitstream": "^2.0.2",
-    "rxjs": "^6.6.3"
+    "rxjs": "^7.5.6"
   }
 }

@@ -1,6 +1,6 @@
 import { BitstreamReader, BitstreamWriter } from '@astronautlabs/bitstream';
 import * as net from 'net';
-import { Observable, Subject } from 'rxjs';
+import { lastValueFrom, Observable, Subject } from 'rxjs';
 import * as Protocol from './protocol';
 import * as syntax from './syntax';
 import { SingleOperationMessage } from './syntax';
@@ -56,19 +56,16 @@ export class Client {
 
     async request(message : syntax.SingleOperationMessage | syntax.MultipleOperationMessage): Promise<SingleOperationMessage> {
         this.sendMessage(message.with({ messageNumber: this.messageNumber++ }));
-        return await this.messageReceived
+        return await lastValueFrom(this.messageReceived
             .pipe(filter(x => x.messageNumber === message.messageNumber))
-            .pipe(take(1))
-            .toPromise()
-        ;
+            .pipe(take(1)));
     }
 
     async init() {
         this.sendMessage(new syntax.InitRequest());
-        return <syntax.InitResponse> await this.messageReceived
+        return <syntax.InitResponse> await lastValueFrom(this.messageReceived
             .pipe(filter(x => x.opID === Protocol.OP.INIT_RESPONSE))
-            .pipe(take(1))
-            .toPromise();
+            .pipe(take(1)));
     }
 
     async alive() {
@@ -84,9 +81,8 @@ export class Client {
             })
         );
 
-        return <syntax.AliveResponse> await this.messageReceived
+        return <syntax.AliveResponse> await lastValueFrom(this.messageReceived
             .pipe(filter(x => x.opID === Protocol.OP.ALIVE_RESPONSE))
-            .pipe(take(1))
-            .toPromise();
+            .pipe(take(1)));
     }
 }
